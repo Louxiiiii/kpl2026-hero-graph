@@ -54,6 +54,12 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
 .stats{display:flex;align-items:center;gap:24px;flex:none}
 .stat{text-align:right;position:relative;padding-left:16px}
 .stat+.stat::before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:1px;height:24px;background:var(--line)}
+.info-btn{
+  display:none;flex:none;width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--line2);background:rgba(23,32,46,.6);color:var(--muted);
+  font:800 13px/1 Georgia,serif;cursor:pointer;align-items:center;justify-content:center;
+}
+.info-btn:active{color:var(--cyan);border-color:var(--cyan)}
 .stat .n{font-size:19px;font-weight:900;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1}
 .stat .l{font-size:9.5px;color:var(--muted);letter-spacing:.1em;font-weight:700;margin-top:4px}
 .stat.cy .n{color:var(--cyan)} .stat.rd .n{color:var(--red)}
@@ -80,6 +86,9 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
 
 /* ===== Filter bar ===== */
 .bar{display:flex;align-items:center;gap:9px;padding:11px 22px;flex:none;flex-wrap:wrap;position:relative;z-index:18}
+.tabs-scroll{display:flex;align-items:center;gap:9px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs-scroll::-webkit-scrollbar{display:none}
+.tab{flex:none}
 .tab{
   display:flex;align-items:center;gap:7px;border:1px solid var(--line2);
   background:rgba(23,32,46,.55);color:var(--sub);border-radius:999px;
@@ -362,11 +371,55 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
   .brand h1{font-size:13.5px;white-space:normal}
   .season-strip,.bar{padding-left:14px;padding-right:14px}
   .season-strip .strip-note{display:none}
-  .panel{width:calc(100vw - 26px);top:10px;bottom:10px;right:13px}
+  .panel{width:min(396px,calc(100vw - 26px))}
   .search-input{width:150px}
   .search-input:focus{width:180px}
   .graph-legend{left:10px;bottom:10px;min-width:132px}
   .brand-watermark{display:none}
+}
+@media (max-width:720px){
+  /* 手机上把纵向空间还给图谱：隐藏赛事条，说明入口放到右上角 i 按钮 */
+  .season-strip{display:none}
+  .info-btn{display:flex}
+  .brand{flex:1 1 auto;min-width:0}
+  .brand-text{min-width:0;overflow:hidden}
+  .brand h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stats{flex:none}
+
+  /* 分路胶囊单行横滑，搜索独占一行 */
+  .bar{flex-wrap:wrap;gap:8px;padding:9px 12px}
+  .tabs-scroll{
+    flex-basis:100%;
+    -webkit-mask-image:linear-gradient(90deg,#000 86%,transparent 100%);
+    mask-image:linear-gradient(90deg,#000 86%,transparent 100%);
+  }
+  .search-wrap{width:100%;margin-left:0}
+  .search-input,.search-input:focus{width:100%}
+
+  /* 面板改为底部抽屉：从下方滑入，按住标题栏下滑可关闭 */
+  .panel{
+    position:fixed;             /* 脱离 .main 的横向滚动，否则面板会跟着画布一起被卷走 */
+    top:auto;left:8px;right:8px;bottom:8px;width:auto;max-width:none;
+    height:min(82vh,660px);
+    border-radius:18px;
+    transform:translateY(calc(100% + 24px));
+    box-shadow:0 -18px 50px rgba(0,0,0,.6);
+  }
+  .panel.open{transform:translateY(0)}
+  .panel::before{
+    content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:2px;background:#3b4d68;
+  }
+  .panel-head{padding-top:20px}
+  .panel-close{top:10px;right:8px;width:38px;height:38px;font-size:24px;line-height:1}
+  .tabs{margin:10px 12px 0}
+  .panel-body{padding:10px 12px 6px}
+  .hero-id .av{width:48px;height:48px}
+  .panel-foot{padding:8px 12px 12px}
+
+  /* 触控细节 */
+  .node text{font-size:10px}
+  .main{-webkit-tap-highlight-color:transparent}
 }
 @media (max-width:620px){
   .search-wrap{width:100%;margin-left:0;margin-top:2px}
@@ -384,8 +437,11 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
   header{gap:8px}
 }
 @media (max-width:430px){
-  .brand h1{font-size:11.5px}
-  .stats{gap:9px}
+  .brand h1{font-size:11.5px;max-width:150px}
+  .stats{gap:8px}
+  .stat{padding-left:6px}
+  .stat .n{font-size:13.5px}
+  .stat+.stat::before{left:-4px}
   .tab{padding:6px 9px;font-size:11px}
   .tab .badge{font-size:9.5px;padding:0 4px}
   .search-input{width:120px}
@@ -404,6 +460,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
         <div class="sub">Honor of Kings · KPL 2026 · Hero Counter Network</div>
       </div>
     </div>
+    <button class="info-btn" id="infoBtn" type="button" aria-label="数据说明" title="数据说明">i</button>
     <div class="stats">
       <div class="stat cy"><div class="n" id="statHeroes">0</div><div class="l">英雄</div></div>
       <div class="stat rd"><div class="n" id="statCounters">0</div><div class="l">克制关系</div></div>
@@ -415,6 +472,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
   <div class="season-strip" id="seasonStrip"></div>
 
   <div class="bar" id="bar">
+    <div class="tabs-scroll" id="tabsScroll"></div>
     <div class="search-wrap">
       <svg class="search-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
       <input class="search-input" id="searchInput" type="text" placeholder="搜索英雄…  ( / )" autocomplete="off">
@@ -434,7 +492,7 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px
       <div class="lg-body">
         <button class="lg-item" data-kind="counter"><span class="lg-line counter"></span>克制线<b id="lgCounter">0</b></button>
         <button class="lg-item" data-kind="synergy"><span class="lg-line synergy"></span>搭档线<b id="lgSynergy">0</b></button>
-        <div class="lg-hint">拖动节点可调整布局 · 点击节点查看明细</div>
+        <div class="lg-hint">点击英雄查看明细 · 头像位置固定，不会拖乱</div>
         <button class="lg-link" id="lgAbout">数据说明与统计口径 ›</button>
       </div>
     </div>
@@ -553,18 +611,19 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
   heroes.forEach(function (h) { posCount[h.pos] = (posCount[h.pos] || 0) + 1; });
   var activePos = "all";
 
+  var tabsScroll = document.getElementById("tabsScroll");
   var allBtn = document.createElement("button");
   allBtn.className = "tab all active";
   allBtn.innerHTML = '<span>全部英雄</span><span class="badge">' + heroes.length + '</span>';
   allBtn.onclick = function () { setPos("all", allBtn); };
-  bar.insertBefore(allBtn, searchWrap);
+  tabsScroll.appendChild(allBtn);
 
   POS_ORDER.forEach(function (pos) {
     var btn = document.createElement("button");
     btn.className = "tab pos-" + pos;
     btn.innerHTML = '<span>' + POS_LABEL[pos] + '</span><span class="badge">' + (posCount[pos] || 0) + '</span>';
     btn.onclick = function () { setPos(pos, btn); };
-    bar.insertBefore(btn, searchWrap);
+    tabsScroll.appendChild(btn);
   });
 
   function setPos(pos, btn) {
@@ -678,7 +737,7 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
   var maxPick = d3.max(heroes, function (h) { return h.pickGames || 0; }) || 1;
   var nodes = heroes.map(function (h) {
     var t = Math.sqrt((h.pickGames || 0) / maxPick);
-    return Object.assign({}, h, { r: 10 + 4.5 * t, moved: false });
+    return Object.assign({}, h, { r: 10 + 4.5 * t });
   });
   var nodeById = {};
   nodes.forEach(function (n) { nodeById[n.id] = n; });
@@ -740,16 +799,18 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
     .attr("stroke-width", 1)
     .attr("stroke-opacity", 0.14);
 
+  // 头像固定不动：只响应点击，不响应拖拽（拖拽会打乱分路列布局，移动端还会抢走滚动）
   var node = nodeG.selectAll("g").data(nodes).join("g")
-    .attr("class", "node")
-    .call(d3.drag()
-      .on("start", dragStart).on("drag", dragMove).on("end", dragEnd));
+    .attr("class", "node");
 
   nodes.forEach(function (n) {
     var clip = defs.append("clipPath").attr("id", "clip-" + n.id);
     clip.append("circle").attr("r", n.r);
   });
 
+  // 透明热区：手指点在小圆点外也能命中
+  node.append("circle").attr("class", "hit").attr("r", function (d) { return d.r + 13; })
+    .attr("fill", "none").attr("pointer-events", "all");
   node.append("circle").attr("class", "halo").attr("r", function (d) { return d.r + 5; })
     .attr("stroke", function (d) { return d.color; });
   node.append("circle").attr("class", "disc").attr("r", function (d) { return d.r; })
@@ -773,14 +834,13 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
       var gap = usable / Math.max(rows, 1);
       var laneX = centerX() + off[pos];
       lane.forEach(function (n, i) {
-        if (n.moved) return;
         var col = i % SUB_COLS, row = Math.floor(i / SUB_COLS);
         n.x = laneX + (col - 1) * SUB_GAP;
         n.y = top + (row + 0.5) * gap;
       });
     });
     nodes.forEach(function (n) {
-      if (n.pos === "unk" && !n.moved) { n.x = centerX(); n.y = HGT / 2; }
+      if (n.pos === "unk") { n.x = centerX(); n.y = HGT / 2; }
     });
   }
 
@@ -791,10 +851,6 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
       .attr("x2", function (d) { return d.target.x; }).attr("y2", function (d) { return d.target.y; });
     node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
   }
-
-  function dragStart(e, d) { d.moved = true; }
-  function dragMove(e, d) { d.x = e.x; d.y = e.y; render(); }
-  function dragEnd() { }
 
   layout();
   render();
@@ -889,6 +945,15 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
     searchInput.value = "";
     closeSearch();
     refresh();
+    if (selected) revealNode(selected);
+  }
+
+  // 窄屏时画布比屏幕宽，选中后把该英雄横向滚到视野中间
+  function revealNode(id) {
+    var n = nodeById[id];
+    if (!n || !main.classList.contains("scrollx")) return;
+    var target = n.x - main.clientWidth / 2;
+    main.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
   }
 
   function applyFilter() {
@@ -951,6 +1016,24 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
     };
   });
   document.getElementById("panelClose").onclick = function () { selected = null; refresh(); };
+
+  // 手机端：面板是底部抽屉，按住标题栏往下滑可关闭
+  (function sheetSwipe() {
+    var startY = null;
+    panel.addEventListener("touchstart", function (e) {
+      if (window.innerWidth > 720 || !e.target.closest(".panel-head")) return;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    panel.addEventListener("touchmove", function (e) {
+      if (startY == null) return;
+      if (e.touches[0].clientY - startY > 70) {
+        startY = null;
+        selected = null;
+        refresh();
+      }
+    }, { passive: true });
+    panel.addEventListener("touchend", function () { startY = null; }, { passive: true });
+  })();
 
   function renderPanel(h, rel) {
     var wr = h.winRate * 100;
@@ -1131,6 +1214,8 @@ window.DATA = {"meta":{"title":"2026 KPL 英雄克制关系图谱","subtitle":"H
   function closeAbout() { overlay.classList.remove("open"); }
   var lgAbout = document.getElementById("lgAbout");
   if (lgAbout) lgAbout.onclick = openAbout;
+  var infoBtn = document.getElementById("infoBtn");
+  if (infoBtn) infoBtn.onclick = openAbout;
   document.getElementById("aboutClose").onclick = closeAbout;
   overlay.addEventListener("click", function (e) { if (e.target === overlay) closeAbout(); });
 
