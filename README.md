@@ -68,8 +68,22 @@ T0 = 前 10%   T1 = 10–30%   T2 = 30–60%   T3 = 其余
     ├── optimize-icons.py     # 头像压成 64px WebP（2.7MB → 225KB）
     ├── build.mjs             # 聚合：赛场关系 + 机制关系 + 强度梯度 → data.js
     ├── build-standalone.mjs  # 打包成单文件 index.html
-    └── make-preview.py       # 生成 preview.webp
+    ├── make-preview.py       # 生成 preview.webp
+    └── raw/                  # 官方数据快照（1.5MB，可直接离线重建）
 ```
+
+## 仓库自带数据快照
+
+`pipeline/raw/` 里提交了 6 个文件（1.5 MB）：四个赛季的逐局数据 `official-2026*.json`、解析后的机制关系 `relations.json`、官网英雄表 `herolist.json`。
+
+所以 clone 下来**不需要联网抓数据**，直接：
+
+```powershell
+node pipeline/build.mjs
+node pipeline/build-standalone.mjs
+```
+
+就能重建出 `index.html`。要更新到最新赛程，再跑 `fetch-official.mjs` 与 `fetch-relations.ps1`（原始 HTML 资料页不入库，已 gitignore）。
 
 ## 本地运行 / 更新
 
